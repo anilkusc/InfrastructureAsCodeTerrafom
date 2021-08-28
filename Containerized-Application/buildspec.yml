@@ -1,0 +1,26 @@
+version: 0.2
+env:
+  variables:
+    IMAGE_REPO_NAME: "factorial-calculator"
+    IMAGE_TAG: "latest"
+    AWS_DEFAULT_REGION: "eu-west-3"
+    # I know that i should not commit my credentials to git repo but i do not have familiarization with aws service roles
+    AWS_ACCOUNT_ID: <Your-Account-ID>
+    AWS_ACCESS_KEY_ID: <Your-Access-Key>
+    AWS_SECRET_ACCESS_KEY: <Your-Access-Key>
+    AWS_DEFAULT_REGION: "eu-west-3"
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...          
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG .
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
